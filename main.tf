@@ -1,7 +1,7 @@
 provider "google" {
-  project = "cellular-codex-352520"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }
 
 resource "google_compute_instance" "vm_instance" {
@@ -20,4 +20,10 @@ resource "google_compute_instance" "vm_instance" {
     access_config {
     }
   }
+}
+
+# Create a GCS Bucket
+resource "google_storage_bucket" "my_bucket" {
+name     = var.bucket_name
+location = var.region
 }
