@@ -1,4 +1,4 @@
 .git
 .terraform*
-terraform*
+terraform.tfstate*
 *.json
