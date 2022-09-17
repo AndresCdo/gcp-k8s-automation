@@ -1,0 +1,5 @@
+- name: Run Docker 17.06 installation
+  become: true
+  apt:
+    name: docker-ce=17.06.0~ce-0~ubuntu
+    state: present

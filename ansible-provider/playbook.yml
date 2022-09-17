@@ -1,8 +1,8 @@
 ---
-- name: Transfer and execute a script.
+- name: Install dependencies for Docker & Kubernetes
   hosts: all
   strategy: free
   become: true
-  tasks:    
-  - name: Install dependencies for Docker & Kubernetes
-    ansible.builtin.script:  provide-node.sh
+  roles:
+  - docker
+  - kubernetes
