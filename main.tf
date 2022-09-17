@@ -17,15 +17,13 @@ location = var.region
 }
 
 resource "google_compute_network" "default" {
-  name = "test-network"
+  name   = "test-network"
 }
 
-resource "google_compute_address" "static_1" {
-  name = "ipv4-address-1"
-}
-
-resource "google_compute_address" "static_2" {
-  name = "ipv4-address-2"
+resource "google_compute_address" "static" {
+  for_each = toset(var.vm_instance_name)
+  name     = "ipv4-address-${each.value}"
+  region   = var.region
 }
 
 resource "google_compute_subnetwork" "default" {
@@ -60,8 +58,9 @@ resource "google_compute_firewall" "default" {
   source_tags = ["web"]
 }
 
-resource "google_compute_instance" "vm_instance" {
-  name         = "terraform-instance"
+resource "google_compute_instance" "vm" {
+  for_each     = toset(var.vm_instance_name)
+  name         = each.value
   machine_type = "${var.machine_type}"
   tags         = ["allow-ssh"] // this receives the firewall rule
 
@@ -80,31 +79,7 @@ resource "google_compute_instance" "vm_instance" {
     network    = google_compute_network.default.name
     subnetwork = google_compute_subnetwork.default.name 
     access_config {
-      nat_ip = google_compute_address.static_1.address
-    }
-  }
-}  
-
-resource "google_compute_instance" "jenkins_instance" {
-  name         = "jenkins-instance"
-  machine_type = "${var.machine_type}"
-  tags         = ["allow-ssh"] // this receives the firewall rule
-
-  boot_disk {
-    initialize_params {
-      image = "${var.linux_image}"
-    }
-  }
-    
-  metadata = {
-    ssh-keys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
-  }
-
-  network_interface {
-    network    = google_compute_network.default.name
-    subnetwork = google_compute_subnetwork.default.name
-    access_config {
-      nat_ip = google_compute_address.static_2.address
+      nat_ip = google_compute_address.static["${each.value}"].address
     }
   }
 }

@@ -19,7 +19,6 @@ variable "gcp_service_list" {
   description ="The list of apis necessary for the project"
   type = list(string)
   default = [
-    "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com"
   ]
 }
@@ -30,8 +29,13 @@ variable "bucket_name" {
 }
 
 variable "vm_instance_name" {
-  description = "GCC Instance name. Value should be unique."
-  type        = string
+  description ="The list of VMs instances names necessary for the project"
+  type = list(string)
+  default = [
+    "master-node",
+    "worker-node-1",
+    "worker-node-2"
+  ]
 }
 
 variable "machine_type" {
@@ -51,5 +55,10 @@ variable "gce_ssh_user" {
 
 variable "gce_ssh_pub_key_file" {
   description = "GCC Instance SSH key."
+  type        = string
+}
+
+variable "gce_ssh_key_file" {
+  description = "GCP Instance SSH private key."
   type        = string
 }
