@@ -34,7 +34,8 @@ variable "vm_instance_name" {
   default = [
     "master-node",
     "worker-node-1",
-    "worker-node-2"
+    "worker-node-2",
+    "worker-node-3",
   ]
 }
 
