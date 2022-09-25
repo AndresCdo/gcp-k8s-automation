@@ -1,6 +1,6 @@
 .git
 .terraform*
-ansible-provider/inventory.txt
+*inventory.txt*
 terraform.tfstate*
 *.json
 plan
