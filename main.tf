@@ -4,11 +4,11 @@ provider "google" {
   zone    = var.zone
 }
 
-resource "google_project_service" "gcp_services" {
-  for_each = toset(var.gcp_service_list)
-  project = "dot-boom"
-  service = each.key
-}
+#resource "google_project_service" "gcp_services" {
+#  for_each = toset(var.gcp_service_list)
+#  project = "dot-boom"
+#  service = each.key
+#}
 
 # Create a GCS Bucket
 resource "google_storage_bucket" "my_bucket" {
