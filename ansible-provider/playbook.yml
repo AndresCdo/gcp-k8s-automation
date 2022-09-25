@@ -21,13 +21,20 @@
       group: "{{ ansible_user }}"
       mode: '0700'
       state: directory
-  
+
+  - name: Start service kubelet, if not started
+    ansible.builtin.service:
+      name: kubelet
+      state: started
+
   - name: Run kubeadm init with Kubernetes version 1.13
-    ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
+    #ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
+    ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 
     register: hash_to_join
   
-  - name: Run
-    
+  - name: Pause until you can verify updates to an application were successful
+    ansible.builtin.pause:
+
   - name: Kubeadm Token to join workers
     ansible.builtin.debug:
       msg: "{{ hash_to_join }}"
@@ -81,6 +88,7 @@
 
   - name: Pause until you can verify updates to an application were successful
     ansible.builtin.pause:
+      seconds: 60
 
   - name: Install the operator on cluster
     become: false
@@ -105,7 +113,7 @@
   #   become: false
   #   ansible.builtin.shell: kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n') 
 
-  - name: Pause for 30 secons to create coredns pods
+  - name: Pause for 60 secons to create coredns pods
     ansible.builtin.pause:
       seconds: 60
 
@@ -116,6 +124,7 @@
 
   - name: Pause until you can verify updates to an application were successful
     ansible.builtin.pause:
+      seconds: 60
 
   - name: Print the kubeadm token
     ansible.builtin.debug:
