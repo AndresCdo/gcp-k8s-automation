@@ -3,3 +3,23 @@
   apt:
     name: docker-ce=17.06.0~ce-0~ubuntu
     state: present
+
+- name: Give group permissions to Docker Socket
+  become: true
+  ansible.builtin.file:
+    path: /var/run/docker.sock
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Delete user exclusion for Docker Socket execution
+  become: true
+  ansible.builtin.file:
+    path: /var/run/docker.sock
+    mode: "u-s"
+
+#- name: Post-Docker-installation
+#  ansible.builtin.systemd:
+#    state: restarted
+#    daemon_reload: yes
+#    name: docker

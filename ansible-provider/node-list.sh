@@ -1,6 +1,9 @@
 #!/bin/bash
 
 node_list=($(gcloud compute instances list | awk '{ print $5 }' | cat -))
+echo "Master node IP: ${node_list[1]}";
+echo "Worker node IPs: ${node_list[@]:2}";
+echo ""
 
 FILE="inventory.txt"
 if [[ -f "$FILE" ]]; then
@@ -10,14 +13,22 @@ if [[ -f "$FILE" ]]; then
     done
 
     dd if=/dev/null of=$FILE
-
-    for node in ${node_list[@]:1}
+    
+    echo "[master]" >> $FILE;
+    echo ${node_list[1]} >> $FILE;
+    echo '' >> $FILE;
+    echo "[workers]" >> $FILE;
+    for node in ${node_list[@]:2}
     do
        echo $node >> $FILE
     done
 else
     touch $FILE
-    for node in ${node_list[@]:1}
+    echo "[master]" >> $FILE;
+    echo ${node_list[1]} >> $FILE;
+    echo '' >> $FILE;
+    echo "[workers]" >> $FILE
+    for node in ${node_list[@]:2}
     do 
        echo $node >> $FILE
     done

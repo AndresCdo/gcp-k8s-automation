@@ -1,8 +1,131 @@
 ---
-- name: Install dependencies for Docker & Kubernetes
+- name: Install dependencies for Docker & Kubernetes in all nodes
   hosts: all
   strategy: free
   become: true
   roles:
   - docker
   - kubernetes
+
+- name: Initialize Master Node in Kubernetes Cluster
+  hosts: master
+  become: true
+  vars:
+    directory: "/home/{{ ansible_user }}/.kube"
+  tasks:
+
+  - name: Ensure permissions in Ansible user home directory
+    file:
+      path: "/home/{{ ansible_user }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0700'
+      state: directory
+  
+  - name: Run kubeadm init with Kubernetes version 1.13
+    ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
+    register: hash_to_join
+  
+  - name: Run
+    
+  - name: Kubeadm Token to join workers
+    ansible.builtin.debug:
+      msg: "{{ hash_to_join }}"
+
+  - name: Creates ~/.kube directory
+    file:
+      path: "{{ directory }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0700'
+      state: directory
+
+  - name: Check if the directory exists
+    ansible.builtin.stat:
+      path: "{{ directory }}"
+    register: dir_to_check
+
+  - name: Directory found
+    ansible.builtin.debug:
+      msg: "Directory {{ directory }} present"
+    when: dir_to_check.stat.isdir is defined and dir_to_check.stat.isdir
+
+  - name: Directory not found
+    ansible.builtin.debug:
+      msg: "Directory {{ directory }} not present"
+    when: dir_to_check.stat.isdir is not defined or not dir_to_check.stat.isdir
+
+  - name: Copy file with owner and permissions
+    ansible.builtin.copy:
+      src: /etc/kubernetes/admin.conf
+      dest: "{{ directory }}/config"
+      remote_src: yes
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0700'
+
+  - name: Check if the directory exists
+    ansible.builtin.stat:
+      path: "{{ directory }}/config"
+    register: file_to_check
+
+  - name: File found
+    ansible.builtin.debug:
+      msg: "File {{ directory }}/config present"
+    when: file_to_check.stat.exists
+
+  - name: File not found
+    ansible.builtin.debug:
+      msg: "File {{ directory }}/config not present"
+    when: not dir_to_check.stat.exists
+
+  - name: Pause until you can verify updates to an application were successful
+    ansible.builtin.pause:
+
+  - name: Install the operator on cluster
+    become: false
+    ansible.builtin.shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+    # ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+
+  - name: Download calico project manifest
+    ansible.builtin.get_url:
+      url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml
+      dest: custom-resources.yaml
+      mode: '0755'
+
+  - name: Create the manifest in order to install Calico
+    become: false
+    ansible.builtin.shell: kubectl create -f custom-resources.yaml
+
+  - name: Install Calico as Kubernetes Pod
+    become: false
+    ansible.builtin.shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calicoctl-etcd.yaml
+
+  # - name: Install Weave Add-on
+  #   become: false
+  #   ansible.builtin.shell: kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n') 
+
+  - name: Pause for 30 secons to create coredns pods
+    ansible.builtin.pause:
+      seconds: 60
+
+  - name: Call kubectl to get kube-system pods
+    become: false
+    ansible.builtin.shell: kubectl get pods --namespace=kube-system
+    register: kube_system_pods
+
+  - name: Pause until you can verify updates to an application were successful
+    ansible.builtin.pause:
+
+  - name: Print the kubeadm token
+    ansible.builtin.debug:
+      var: hash_to_join.stdout
+
+- name: Initialize Worker Nodes in Kubernetes Cluster
+  hosts: workers
+  become: true
+  tasks:
+    - name: Join to Kubernetes Cluster using kubeadm token
+      ansible.builtin.shell: "{{ hostvars[item]['hash_to_join']['stdout']  }}"
+      #ansible.builtin.shell: "kubeadm join 10.0.0.9:6443 --token bmdkhn.q2j4t94dcj9dbd5p --discovery-token-ca-cert-hash sha256:ddcc4e6898acdf8b85522effd57413272b957c092b8a3da08c62aba50b80a147"
+      with_items: "{{ groups['master'] }}"

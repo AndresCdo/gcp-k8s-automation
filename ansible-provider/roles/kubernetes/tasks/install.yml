@@ -22,3 +22,8 @@
     name: kubeadm=1.13.4-00
     state: present
 
+- name: Post-Kubernetes-installation
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: kubelet
