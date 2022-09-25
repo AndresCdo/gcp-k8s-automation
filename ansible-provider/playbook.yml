@@ -90,24 +90,24 @@
     ansible.builtin.pause:
       seconds: 60
 
-  - name: Install the operator on cluster
-    become: false
-    ansible.builtin.shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
-    # ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+  #- name: Install the operator on cluster
+  #  become: false
+  #  ansible.builtin.shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+  #  # ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
 
   - name: Download calico project manifest
     ansible.builtin.get_url:
-      url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml
-      dest: custom-resources.yaml
+      url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
+      dest: calico.yaml
       mode: '0755'
 
-  - name: Create the manifest in order to install Calico
-    become: false
-    ansible.builtin.shell: kubectl create -f custom-resources.yaml
+  #- name: Create the manifest in order to install Calico
+  #  become: false
+  #  ansible.builtin.shell: kubectl create -f custom-resources.yaml
 
   - name: Install Calico as Kubernetes Pod
     become: false
-    ansible.builtin.shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calicoctl-etcd.yaml
+    ansible.builtin.shell: kubectl apply -f calico.yaml
 
   # - name: Install Weave Add-on
   #   become: false
