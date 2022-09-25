@@ -98,7 +98,7 @@
   - name: Download calico project manifest
     ansible.builtin.get_url:
       url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
-      dest: calico.yaml
+      #dest: calico.yaml
       mode: '0755'
 
   #- name: Create the manifest in order to install Calico
@@ -128,7 +128,7 @@
 
   - name: Print the kubeadm token
     ansible.builtin.debug:
-      var: hash_to_join.stdout
+      var: $( echo hash_to_join.stdout | grep kubeadm join )
 
 - name: Initialize Worker Nodes in Kubernetes Cluster
   hosts: workers
