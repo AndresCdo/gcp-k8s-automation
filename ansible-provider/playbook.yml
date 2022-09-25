@@ -107,8 +107,9 @@
 
   - name: Download calico project manifest
     ansible.builtin.get_url:
+      become: false
       url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
-      #dest: calico.yaml
+      dest: ~/calico.yaml
       mode: '0755'
 
   #- name: Create the manifest in order to install Calico
@@ -117,7 +118,7 @@
 
   - name: Install Calico as Kubernetes Pod
     become: false
-    ansible.builtin.shell: kubectl apply -f calico.yaml
+    ansible.builtin.shell: kubectl apply -f ~/calico.yaml
 
   # - name: Install Weave Add-on
   #   become: false
@@ -145,6 +146,6 @@
   become: true
   tasks:
     - name: Join to Kubernetes Cluster using kubeadm token
-      ansible.builtin.shell: "{{ hostvars[item]['hash_to_join']['stdout']  }}"
+      ansible.builtin.shell: $( echo "{{ hostvars[item]['hash_to_join']['stdout']  }}" | grep kubeadm join )
       #ansible.builtin.shell: "kubeadm join 10.0.0.9:6443 --token bmdkhn.q2j4t94dcj9dbd5p --discovery-token-ca-cert-hash sha256:ddcc4e6898acdf8b85522effd57413272b957c092b8a3da08c62aba50b80a147"
       with_items: "{{ groups['master'] }}"
