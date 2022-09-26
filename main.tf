@@ -82,4 +82,8 @@ resource "google_compute_instance" "vm" {
       nat_ip = google_compute_address.static["${each.value}"].address
     }
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
