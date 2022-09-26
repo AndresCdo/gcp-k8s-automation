@@ -10,7 +10,7 @@
         msg: 
           - 1 or more host is UNREACHABLE
       # success_msg: ALL hosts are REACHABLE, go on
-      until: ansible_play_hosts != groups.all
+      until: ansible_play_hosts == groups.all
         
   roles:
   - docker
