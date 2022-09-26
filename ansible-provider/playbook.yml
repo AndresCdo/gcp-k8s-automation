@@ -140,7 +140,7 @@
       seconds: 60
   
   - name: Extract kubeadm token from stdout
-    ansible.builtin.shell: echo "{{ hash_to_join.stdout_lines }}" | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
+    ansible.builtin.shell: echo "{{ hash_to_join.stdout_lines[-2:-1] }}"
     register: result
 
   - name: Print the kubeadm token
