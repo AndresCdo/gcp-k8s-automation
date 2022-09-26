@@ -100,10 +100,10 @@
     ansible.builtin.pause:
       seconds: 60
 
-   - name: Install the operator on cluster
-     become: false
-  #  ansible.builtin.shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
-     ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+  - name: Install the operator on cluster
+    become: false
+    # ansible.builtin.shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+    ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
 
   #- name: Download calico project manifest
   #  become: false
