@@ -106,8 +106,8 @@
   #  # ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
 
   - name: Download calico project manifest
-    ansible.builtin.get_url:
-      become: false
+    become: false
+    ansible.builtin.get_url:      
       url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
       dest: ~/calico.yaml
       mode: '0755'
