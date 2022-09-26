@@ -5,18 +5,13 @@
   become: true
 
   pre_tasks:
-    - name: Wait 15 seconds
-      pause:
-        seconds: 15
-
     - name: Check ALL hosts are reacheable before doing the release
-      assert:
-        that:
-          - ansible_play_hosts == groups.all
-        fail_msg: 1 or more host is UNREACHABLE
-        success_msg: ALL hosts are REACHABLE, go on
-      run_once: yes
-
+      debug:
+        msg: 
+          - 1 or more host is UNREACHABLE
+      # success_msg: ALL hosts are REACHABLE, go on
+      until: ansible_play_hosts != groups.all
+        
   roles:
   - docker
   - kubernetes
