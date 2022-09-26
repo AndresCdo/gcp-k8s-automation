@@ -11,7 +11,9 @@
           - 1 or more host is UNREACHABLE
       # success_msg: ALL hosts are REACHABLE, go on
       until: ansible_play_hosts == groups.all
-        
+      retries: 10
+      delay: 10
+
   roles:
   - docker
   - kubernetes
