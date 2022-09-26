@@ -5,6 +5,10 @@
   become: true
 
   pre_tasks:
+    - name: Wait 15 seconds
+      pause:
+        seconds: 15
+
     - name: Check ALL hosts are reacheable before doing the release
       assert:
         that:
@@ -44,6 +48,7 @@
   
   - name: Pause until you can verify updates to an application were successful
     ansible.builtin.pause:
+      seconds: 15
 
   - name: Kubeadm Token to join workers
     ansible.builtin.debug:
