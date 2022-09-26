@@ -1,7 +1,7 @@
 ---
 - name: Install dependencies for Docker & Kubernetes in all nodes
   hosts: all
-  strategy: free
+  # strategy: free
   become: true
 
   pre_tasks:
