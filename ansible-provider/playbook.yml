@@ -160,6 +160,6 @@
   become: true
   tasks:
     - name: Join to Kubernetes Cluster using kubeadm token
-      ansible.builtin.shell: $( echo "{{ hostvars[item]['result']['stdout']  }}" | grep kubeadm join )
+      ansible.builtin.shell: "{{ hostvars[item]['result']['stdout'] }}"
       #ansible.builtin.shell: "kubeadm join 10.0.0.9:6443 --token bmdkhn.q2j4t94dcj9dbd5p --discovery-token-ca-cert-hash sha256:ddcc4e6898acdf8b85522effd57413272b957c092b8a3da08c62aba50b80a147"
       with_items: "{{ groups['master'] }}"
