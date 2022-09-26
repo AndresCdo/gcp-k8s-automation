@@ -109,7 +109,7 @@
     become: false
     ansible.builtin.get_url:      
       url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
-      dest: ~/calico.yaml
+      dest: ./calico.yaml
       mode: '0755'
 
   #- name: Create the manifest in order to install Calico
@@ -118,7 +118,7 @@
 
   - name: Install Calico as Kubernetes Pod
     become: false
-    ansible.builtin.shell: kubectl apply -f ~/calico.yaml
+    ansible.builtin.shell: kubectl apply -f ./calico.yaml
 
   # - name: Install Weave Add-on
   #   become: false
