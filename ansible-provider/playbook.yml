@@ -144,16 +144,7 @@
     register: kube_system_pods
 
   - name: Pause until you can verify updates to an application were successful
-    ansible.builtin.pause:
-      seconds: 60
-  
-  - name: Extract kubeadm token from stdout
-    ansible.builtin.shell: echo "{{ hash_to_join.stdout_lines[-1] }}"
-    register: result
-
-  - name: Print the kubeadm token
-    ansible.builtin.debug:
-      var: result.stdout
+    ansible.builtin.debug: "{{ kube_system_pods }}"
 
 - name: Initialize Worker Nodes in Kubernetes Cluster
   hosts: workers
