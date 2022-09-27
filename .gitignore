@@ -2,5 +2,5 @@
 .terraform*
 *inventory.txt*
 terraform.tfstate*
-*.json
+credentials.json
 plan
