@@ -47,7 +47,7 @@
   - name: Run kubeadm init with Kubernetes version 1.13
     # ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
     # ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 
-    ansible.builtin.shell: kubeadm init --conf "/home/{{ ansible_user }}/kubeadm-config.yml"   
+    ansible.builtin.shell: kubeadm init --config "/home/{{ ansible_user }}/kubeadm-config.yml"   
     register: hash_to_join
   
   - name: Pause until you can verify updates to an application were successful
