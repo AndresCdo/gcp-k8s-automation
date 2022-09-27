@@ -18,8 +18,28 @@
     path: /var/run/docker.sock
     mode: "u-s"
 
-#- name: Post-Docker-installation
-#  ansible.builtin.systemd:
-#    state: restarted
-#    daemon_reload: yes
-#    name: docker
+- name: Setup systemd as driver
+  become: true
+  ansible.built.copy:
+    src: ./conf/docker/daemon.json
+    dest: /etc/docker
+    mode: '0755'
+
+- name: Check if config file was transferred
+  ansible.builtin.stat:
+    path: /etc/docker/daemon.json
+  register: file_check
+
+- name: File found
+  debug: "File found..."
+  when: file_check.stat.exits
+
+- name: File not found
+  debug: "File not found!"
+  when: not file_check.stat.exits
+
+- name: Post-Docker-installation
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker
