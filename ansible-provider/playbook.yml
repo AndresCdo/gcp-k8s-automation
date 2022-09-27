@@ -34,8 +34,8 @@
       state: directory
 
   - name: Copy kubelet config file
-    ansible.builtin.template:
-      src: conf/kubernetes/kubeadm-config.yml
+    ansible.builtin.copy:
+      src: "{{ playbook_dir }}/conf/kubernetes/kubeadm-config.yml"
       dest: "/home/{{ ansible_user }}"
       mode: '0755'
 
