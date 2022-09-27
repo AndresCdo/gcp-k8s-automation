@@ -5,13 +5,14 @@ echo "Master node IP: ${node_list[1]}";
 echo "Worker node IPs: ${node_list[@]:2}";
 echo ""
 
+for node in ${node_list[@]:1}
+do
+    ssh-keygen -f "$HOME/.ssh/known_hosts" -R $node
+done
+
 FILE="inventory.txt"
 if [[ -f "$FILE" ]]; then
-    for node in ${node_list[@]:1}
-    do
-       ssh-keygen -f "$HOME/.ssh/known_hosts" -R $node
-    done
-
+	
     dd if=/dev/null of=$FILE
     
     echo "[master]" >> $FILE;
