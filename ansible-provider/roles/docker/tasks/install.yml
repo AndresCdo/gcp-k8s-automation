@@ -31,11 +31,13 @@
   register: file_check
 
 - name: File found
-  debug: "File found..."
+  ansible.builtin.debug: 
+    msg: "File found..."
   when: file_check.stat.exits
 
 - name: File not found
-  debug: "File not found!"
+  ansible.builtin.debug:
+    msg:  "File not found!"
   when: not file_check.stat.exits
 
 - name: Post-Docker-installation
