@@ -3,7 +3,7 @@
 node_list=($(gcloud compute instances list | awk '{ print $5 }' | cat -))
 echo "Master node IP: ${node_list[1]}";
 echo "Worker node IPs: ${node_list[@]:2}";
-echo ""
+echo "$PWD"
 
 for node in ${node_list[@]:1}
 do
@@ -36,6 +36,8 @@ else
 fi
 
 sleep 3
+
+cat $FILE
 #echo ${node_list[@]:1} | cat -
 #for node in ${node_list[@]:1}
 #do	
