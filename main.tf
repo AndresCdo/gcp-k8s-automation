@@ -84,6 +84,6 @@ resource "google_compute_instance" "vm" {
   }
 
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 }
