@@ -143,8 +143,9 @@
     ansible.builtin.shell: kubectl get pods --namespace=kube-system
     register: kube_system_pods
 
-  - name: Pause until you can verify updates to an application were successful
-    ansible.builtin.debug: "{{ kube_system_pods }}"
+  - name: kube-system pods
+    ansible.builtin.debug: 
+      msg: "{{ kube_system_pods }}"
 
 - name: Initialize Worker Nodes in Kubernetes Cluster
   hosts: workers
