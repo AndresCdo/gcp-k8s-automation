@@ -33,12 +33,12 @@
 - name: File found
   ansible.builtin.debug: 
     msg: "File found..."
-  when: file_check.stat.exits
+  when: file_check.stat.exists
 
 - name: File not found
   ansible.builtin.debug:
     msg:  "File not found!"
-  when: not file_check.stat.exits
+  when: not file_check.stat.exists
 
 - name: Post-Docker-installation
   ansible.builtin.systemd:
