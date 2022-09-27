@@ -20,7 +20,7 @@
 
 - name: Setup systemd as driver
   become: true
-  ansible.built.copy:
+  ansible.builtin.copy:
     src: ./conf/docker/daemon.json
     dest: /etc/docker
     mode: '0755'
