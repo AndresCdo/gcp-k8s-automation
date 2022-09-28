@@ -170,3 +170,42 @@
       ansible.builtin.shell: "{{ hostvars[item]['result']['stdout'] }}"
       #ansible.builtin.shell: "kubeadm join 10.0.0.9:6443 --token bmdkhn.q2j4t94dcj9dbd5p --discovery-token-ca-cert-hash sha256:ddcc4e6898acdf8b85522effd57413272b957c092b8a3da08c62aba50b80a147"
       with_items: "{{ groups['master'] }}"
+
+- name: Reset Weave network data
+  hosts: all
+  strategy: free
+  become: true
+
+  pre_tasks:
+    - name: Check ALL hosts are reacheable before doing the release
+      debug:
+        msg:
+          - 1 or more host is UNREACHABLE
+      # success_msg: ALL hosts are REACHABLE, go on
+      until: ansible_play_hosts == groups.all
+      retries: 10
+      delay: 10
+
+  tasks:
+    - name: Remove database
+      ansible.builtin.file:
+        path: /var/lib/weave/weave-netdata.db
+        state: absent
+    
+    - name: Reboot host and wait for it to restart
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: whoami
+    
+    - name: Give group permissions to Docker Socket
+      become: true
+      ansible.builtin.file:
+        path: /var/run/docker.sock
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+
