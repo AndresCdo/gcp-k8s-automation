@@ -4,20 +4,6 @@
     name: docker-ce=17.06.0~ce-0~ubuntu
     state: present
 
-- name: Give group permissions to Docker Socket
-  become: true
-  ansible.builtin.file:
-    path: /var/run/docker.sock
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0755"
-
-- name: Delete user exclusion for Docker Socket execution
-  become: true
-  ansible.builtin.file:
-    path: /var/run/docker.sock
-    mode: "u-s"
-
 - name: Setup systemd as driver
   become: true
   ansible.builtin.copy:
@@ -41,7 +27,23 @@
   when: not file_check.stat.exists
 
 - name: Post-Docker-installation
+  become: true
   ansible.builtin.systemd:
     state: restarted
     daemon_reload: yes
     name: docker
+
+- name: Give group permissions to Docker Socket
+  become: true
+  ansible.builtin.file:
+    path: /var/run/docker.sock
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Delete user exclusion for Docker Socket execution
+  become: true
+  ansible.builtin.file:
+    path: /var/run/docker.sock
+    mode: "u-s"
+
