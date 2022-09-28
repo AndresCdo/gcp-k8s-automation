@@ -50,7 +50,7 @@
 
   - name: Print migrate process output
     debug:
-      msg: migrate.stdout_lines
+      msg: "{{ migrate.stdout_lines }}"
 
   - name: Run kubeadm init with Kubernetes version 1.13
     # ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
