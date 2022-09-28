@@ -33,11 +33,11 @@
       mode: '0700'
       state: directory
 
-  #- name: Copy kubelet config file
-  #  ansible.builtin.copy:
-  #    src: "{{ playbook_dir }}/conf/kubernetes/kubeadm-config.yml"
-  #    dest: "/home/{{ ansible_user }}"
-  #    mode: '0755'
+  - name: Copy kubelet config file
+    ansible.builtin.copy:
+      src: "{{ playbook_dir }}/conf/kubernetes/kubeadm-config.yml"
+      dest: "/home/{{ ansible_user }}"
+      mode: '0755'
 
   - name: Start service kubelet, if not started
     ansible.builtin.service:
@@ -46,8 +46,8 @@
 
   - name: Run kubeadm init with Kubernetes version 1.13
     # ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
-    ansible.builtin.shell: kubeadm init --cgroup-driver=systemd --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 
-    # ansible.builtin.shell: kubeadm init --config "/home/{{ ansible_user }}/kubeadm-config.yml"   
+    # ansible.builtin.shell: kubeadm init --cgroup-driver=systemd --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 
+    ansible.builtin.shell: kubeadm init --config "/home/{{ ansible_user }}/kubeadm-config.yml"   
     register: hash_to_join
   
   - name: Pause until you can verify updates to an application were successful
