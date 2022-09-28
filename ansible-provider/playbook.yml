@@ -46,7 +46,7 @@
 
   - name: Migrate Kubeadm config file
     ansible.builtin.shell: kubeadm config migrate --old-config "/home/{{ ansible_user }}/kubeadm-config.yml"
-    register: mitrate
+    register: migrate
 
   - name: Print migrate process output
     debug:
