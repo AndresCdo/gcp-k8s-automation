@@ -21,7 +21,7 @@
       ansible.builtin.shell: "bash node-list.sh"
         
 - name: Provide Initial Setup to Master Node
-  hosts: "{{ master_node_ext_ip.stdout }}"
+  hosts: "{{ hostvars['localhost']['master_node_ext_ip']['stdout'] }}"
   become: true
   remote_user: "{{ ansible_user }}"
   tasks:
@@ -65,13 +65,12 @@
         mode: '0755'
 
 - name: Ansible provisioning to Kubernetes Cluster
-  hosts: "{{ master_node_ext_ip.stdout }}"
+  hosts: "{{ hostvars['localhost']['master_node_ext_ip']['stdout'] }}"
+  become: true
   remote_user: "{{ ansible_user }}"
   tasks:
     - name: Execute Extra-mandatory Ansible playbook
-      become: true
       ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o "StrictHostKeyChecking no"' -u andres harden-new-system.yml
     
     - name: Execute Main Ansible playbook
-      become: true
       ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o "StrictHostKeyChecking no"' -u andres playbook.yml
