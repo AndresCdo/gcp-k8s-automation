@@ -23,7 +23,7 @@
   tasks:
     - name: Configure packages
       become: true
-      ansible.builtin:shell: dpkg --configure -a
+      ansible.builtin.shell: dpkg --configure -a
 
     - name: Update all packages to their latest version
       ansible.builtin.apt:
