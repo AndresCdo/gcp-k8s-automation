@@ -1,6 +1,6 @@
 .git
 .terraform*
-*inventory.txt*
+*inventory.ini*
 terraform.tfstate*
 credentials.json
 plan
