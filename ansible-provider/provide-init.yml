@@ -47,18 +47,24 @@
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/inventory.ini"
         dest: "/home/{{ ansible_user }}/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: '0755'
     
     - name: Transfer Main playbook
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/playbook.yml"
         dest: "/home/{{ ansible_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: '0755'
     
     - name: Transfer Extra-mandatory playbook
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/harden-new-system.yml"
         dest: "/home/{{ ansible_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: '0755'
 
 - name: Ansible provisioning to Kubernetes Cluster
@@ -66,7 +72,7 @@
   become: true
   tasks:
     - name: Execute Extra-mandatory Ansible playbook
-      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres '/home/{{ ansible_user }}/harden-new-system.yml'
+      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres ~/harden-new-system.yml
    
     - name: Execute Main Ansible playbook
-      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres '/home/{{ ansible_user }}/playbook.yml'
+      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres ~/playbook.yml
