@@ -39,6 +39,8 @@
       ansible.builtin.copy:
         src: "{{ lookup('ansible.builtin.env', 'SSH_KEY_PATH') }}"
         dest: "/home/{{ ansible_user }}/.ssh/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: '0600'
     
     - name: Transfer inventory file
