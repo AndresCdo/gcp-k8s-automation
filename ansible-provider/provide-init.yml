@@ -20,7 +20,6 @@
 - name: Provide Initial Setup to Master Node
   hosts: all
   become: true
-  remote_user: "{{ ansible_user }}"
   tasks:
     - name: Configure packages
       ansible.builtin.shell: dpkg --configure -a
@@ -63,7 +62,6 @@
 - name: Ansible provisioning to Kubernetes Cluster
   hosts: all
   become: true
-  remote_user: "{{ ansible_user }}"
   tasks:
     - name: Execute Extra-mandatory Ansible playbook
       ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o "StrictHostKeyChecking no"' -u andres harden-new-system.yml
