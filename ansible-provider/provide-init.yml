@@ -1,0 +1,69 @@
+---
+- name: Jenkins provisioning
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Provide node list information from GCP
+      ansible.builtin.shell: "gcloud compute instances list | grep master | awk '{ print $((NF - 1)) }'"
+      register: master_node_ext_ip
+    
+    - name: Provide inventory file
+      ansible.builtin.shell: "bash node-list.sh"
+        
+- name: Provide Initial Setup to Master Node
+  hosts: "{{ master_node_ext_ip.stdout }}"
+  become: true
+  remote_user: "{{ ansible_user }}"
+  tasks:
+    - name: Update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Install Ansible
+      ansible.builtin.apt:
+        name: "ansible"
+        state: latest
+    
+    - name: Transfer SSH private key
+      ansible.builtin.copy:
+        src: "/home/{{ ansible_user }}/.ssh/kubernetes-lab-ssh-key"
+        dest: "/home/{{ ansible_user }}/.ssh/"
+        mode: '0600'
+    
+    - name: Transfer inventory file
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/inventory.ini"
+        dest: "/home/{{ ansible_user }}/"
+        mode: '0755'
+    
+    - name: Transfer Main playbook
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/playbook.yml"
+        dest: "/home/{{ ansible_user }}"
+        mode: '0755'
+    
+    - name: Transfer Extra-mandatory playbook
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/harden-new-system.yml"
+        dest: "/home/{{ ansible_user }}"
+        mode: '0755'
+
+- name: Ansible provisioning to Kubernetes Cluster
+  hosts: "{{ master_node_ext_ip.stdout }}"
+  remote_user: "{{ ansible_user }}"
+  tasks:
+    - name: Execute Extra-mandatory Ansible playbook
+      become: true
+      ansible.builtin.shell: "ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o '"'StrictHostKeyChecking no'"'' -u andres harden-new-system.yml"
+    
+    - name: Execute Main Ansible playbook
+      become: true
+      ansible.builtin.shell: "ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o '"'StrictHostKeyChecking no'"'' -u andres playbook.yml" 
