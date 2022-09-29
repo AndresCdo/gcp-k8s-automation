@@ -1,5 +1,5 @@
 project_id           = "dot-boom"                   
-bucket_name          = "my-bucket-48693"
+bucket_name          = "default"
 machine_type         = "e2-micro"
 linux_image          = "ubuntu-os-pro-cloud/ubuntu-pro-1604-lts"
 gce_ssh_user         = "andres"
