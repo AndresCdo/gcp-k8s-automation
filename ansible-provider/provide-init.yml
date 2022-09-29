@@ -71,8 +71,10 @@
   hosts: all
   become: true
   tasks:
+    - name: Print hostname
+      debug: 
     - name: Execute Extra-mandatory Ansible playbook
-      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres "{{ playbook_dir }}/harden-new-system.yml"
+      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres '{{ playbook_dir }}/harden-new-system.yml'
    
     - name: Execute Main Ansible playbook
-      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres "{{ playbook_dir }}/playbook.yml"
+      ansible.builtin.shell: ansible-playbook -i inventory.ini --private-key ~/.ssh/kubernetes-lab-ssh-key --ssh-extra-args '-o 'StrictHostKeyChecking no'' -u andres '{{ playbook_dir }}/playbook.yml'
