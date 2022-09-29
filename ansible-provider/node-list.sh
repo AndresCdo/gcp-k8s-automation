@@ -1,6 +1,6 @@
 #!/bin/bash
 
-node_list=($(gcloud compute instances list | awk '{ print $5 }' | cat -))
+node_list=($(gcloud compute instances list | awk '{ print $4 }' | cat -))
 echo "Master node IP: ${node_list[1]}";
 echo "Worker node IPs: ${node_list[@]:2}";
 echo "$PWD"
@@ -10,7 +10,7 @@ do
     ssh-keygen -f "$HOME/.ssh/known_hosts" -R $node
 done
 
-FILE="inventory.txt"
+FILE="inventory.ini"
 if [[ -f "$FILE" ]]; then
 	
     dd if=/dev/null of=$FILE
@@ -38,8 +38,4 @@ fi
 sleep 3
 
 cat $FILE
-#echo ${node_list[@]:1} | cat -
-#for node in ${node_list[@]:1}
-#do	
-#	ssh -i ~/.ssh/kubernetes-lab-ssh-key andres@"$node" 'bash -s' < provide-node.sh
-#done
+
