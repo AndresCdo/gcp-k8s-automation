@@ -1,11 +1,7 @@
 ---
-
 - hosts: all
   vars:
-    allowed_ssh_networks:
-      - 192.168.0.0/24
-      - 10.10.0.0/24
-    unnecessary_services:
+   unnecessary_services:
       - postfix
       - telnet
     unnecessary_software:
@@ -54,32 +50,6 @@
         owner: root
         group: root
         mode: 0600
-      notify: Reload SSH
-
-    - name: Add SSH port to internal zone
-      firewalld:
-        zone: internal
-        service: ssh
-        state: enabled
-        immediate: yes
-        permanent: yes
-
-    - name: Add permitted networks to internal zone
-      firewalld:
-        zone: internal
-        source: "{{ item }}"
-        state: enabled
-        immediate: yes
-        permanent: yes
-      with_items: "{{ allowed_ssh_networks }}"
-
-    - name: Drop ssh from the public zone
-      firewalld:
-        zone: public
-        service: ssh
-        state: disabled
-        immediate: yes
-        permanent: yes
 
     - name: Remove undesirable packages
       package:
@@ -113,6 +83,46 @@
         - /etc/issue
         - /etc/issue.net
 
+  handlers:
+    - name: Reload SSH
+      service:
+        name: sshd
+        state: reloaded
+
+- name: SSH just internally
+  hosts: workers
+  become: true
+  vars:
+    allowed_ssh_networks:
+      - 192.168.0.0/24
+      - 10.0.0.0/24
+      - 127.0.0.0/24
+  tasks:
+    - name: Add SSH port to internal zone
+      firewalld:
+        zone: internal
+        service: ssh
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+    - name: Add permitted networks to internal zone
+      firewalld:
+        zone: internal
+        source: "{{ item }}"
+        state: enabled
+        immediate: yes
+        permanent: yes
+      with_items: "{{ allowed_ssh_networks }}"
+
+    - name: Drop ssh from the public zone
+      firewalld:
+        zone: public
+        service: ssh
+        state: disabled
+        immediate: yes
+        permanent: yes
+  
   handlers:
     - name: Reload SSH
       service:
