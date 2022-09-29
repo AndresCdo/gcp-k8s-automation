@@ -2,9 +2,9 @@
 - name: Jenkins provisioning
   hosts: localhost
   connection: local
+  become: true
   tasks:
     - name: Configure packages
-      become: true
       ansible.builtin.shell: dpkg --configure -a
 
     - name: Update all packages to their latest version
@@ -12,21 +12,17 @@
         name: "*"
         state: latest
         update_cache: yes
-
-    - name: Provide node list information from GCP
-      ansible.builtin.shell: "gcloud compute instances list | grep master | awk '{ print $((NF - 1)) }'"
-      register: master_node_ext_ip
     
     - name: Provide inventory file
+      become: false
       ansible.builtin.shell: "bash node-list.sh"
         
 - name: Provide Initial Setup to Master Node
-  hosts: "{{ hostvars['localhost']['master_node_ext_ip']['stdout'] }}"
+  hosts: all
   become: true
   remote_user: "{{ ansible_user }}"
   tasks:
     - name: Configure packages
-      become: true
       ansible.builtin.shell: dpkg --configure -a
 
     - name: Update all packages to their latest version
@@ -65,7 +61,7 @@
         mode: '0755'
 
 - name: Ansible provisioning to Kubernetes Cluster
-  hosts: "{{ hostvars['localhost']['master_node_ext_ip']['stdout'] }}"
+  hosts: all
   become: true
   remote_user: "{{ ansible_user }}"
   tasks:
