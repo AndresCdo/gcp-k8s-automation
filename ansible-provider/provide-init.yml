@@ -37,7 +37,7 @@
     
     - name: Transfer SSH private key
       ansible.builtin.copy:
-        src: "/home/{{ ansible_user }}/.ssh/kubernetes-lab-ssh-key"
+        src: "{{ lookup('ansible.builtin.env', 'SSH_KEY_PATH') }}"
         dest: "/home/{{ ansible_user }}/.ssh/"
         mode: '0600'
     
