@@ -132,7 +132,7 @@
 
   - name: Install Weave Add-on
     become: false
-    ansible.builtin.shell: $ kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml 
+    ansible.builtin.shell: kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml 
 
   - name: Pause for 30 secons to create coredns pods
     ansible.builtin.pause:
