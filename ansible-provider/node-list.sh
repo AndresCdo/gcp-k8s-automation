@@ -5,7 +5,7 @@ echo "Master node IP: ${node_list[0]}";
 echo "Worker node IPs: ${node_list[@]:1}";
 echo ""
 
-for node in ${node_ip[@]}
+for node in ${node_list[@]}
 do
     ssh-keygen -f "$HOME/.ssh/known_hosts" -R $node
 done
