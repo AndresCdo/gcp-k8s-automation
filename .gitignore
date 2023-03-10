@@ -2,6 +2,6 @@
 .terraform*
 *inventory.ini*
 terraform.tfstate*
-credentials.json
+*.json
 plan
 *.svg
