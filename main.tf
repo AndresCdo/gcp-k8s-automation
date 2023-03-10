@@ -17,25 +17,25 @@ provider "google" {
 # }
 
 # Create VPC
-resource "google_compute_network" "default" {
-  name   = "default"
+resource "google_compute_network" "vcp_cluster" {
+  name   = "vcp_cluster"
 }
 
 # Create Subnet
 ##  Create public subnet
-resource "google_compute_subnetwork" "default" {
+resource "google_compute_subnetwork" "pub_subnet" {
   name          = "public-subnet"
   ip_cidr_range = "10.0.0.0/16"
   region        = var.region
-  network       = google_compute_network.default.id
+  network       = google_compute_network.vcp_cluster.id
 }
 
 ## Create private subnet
 resource "google_compute_subnetwork" "internal" {
   name          = "private-subnet"
-  ip_cidr_range = "10.51.1.0/24"
+  ip_cidr_range = "10.61.1.0/24"
   region        = var.region
-  network       = google_compute_network.default.id
+  network       = google_compute_network.vcp_cluster.id
   private_ip_google_access = "true"
 }
 
@@ -59,9 +59,9 @@ resource "google_compute_address" "internal_with_subnet_and_address" {
   region       = var.region
 }
 
-resource "google_compute_firewall" "default" {
-  name    = "default-firewall"
-  network = google_compute_network.default.name
+resource "google_compute_firewall" "firewall_cluster" {
+  name    = "firewall-cluster"
+  network = google_compute_network.vcp_cluster.name
   target_tags   = ["allow-ssh"] // this targets our tagged VM
   source_ranges = ["0.0.0.0/0"]
   allow {
@@ -94,7 +94,7 @@ resource "google_compute_instance" "master" {
   
   network_interface {
     # A default network is created for all GCP projects
-    network    = google_compute_network.default.name
+    network    = google_compute_network.vcp_cluster.name
     subnetwork = google_compute_subnetwork.internal.name 
     access_config {
       nat_ip = google_compute_address.master-static["${each.value}"].address
@@ -124,8 +124,8 @@ resource "google_compute_instance" "worker" {
   
   network_interface {
     # A default network is created for all GCP projects
-    network    = google_compute_network.default.name
-    subnetwork = google_compute_subnetwork.default.name
+    network    = google_compute_network.vcp_cluster.name
+    subnetwork = google_compute_subnetwork.pub_subnet.name
     access_config {
       nat_ip = google_compute_address.worker-static["${each.value}"].address
     }
