@@ -1,0 +1,12 @@
+- name: Add Kubernetes packages repository into sources list
+  ansible.builtin.apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-{{ ansible_distribution_release }} main
+
+- name: Add source key for Kubernetes repositories
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: Update repositories database
+  ansible.builtin.apt:
+    update_cache: yes
+

@@ -1,0 +1,5 @@
+- name: Setup source code Docker repository
+  import_tasks: source.yml
+
+- name: Install Package
+  import_tasks: install.yml

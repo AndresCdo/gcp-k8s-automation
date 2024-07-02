@@ -1,0 +1,29 @@
+- name: Run kubernetes-cni installation
+  become: true
+  apt:
+    name: kubernetes-cni=0.6.0-00
+    state: present
+
+- name: Run kubectl installation
+  become: true
+  apt:
+    name: kubectl=1.13.4-00
+    state: present
+
+- name: Run kubelet installation
+  become: true
+  apt:
+    name: kubelet=1.13.4-00
+    state: present
+
+- name: Run kubeadm installation
+  become: true
+  apt:
+    name: kubeadm=1.13.4-00
+    state: present
+
+- name: Post-Kubernetes-installation
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: kubelet

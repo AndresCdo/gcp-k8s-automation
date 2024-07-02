@@ -28,13 +28,19 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "vm_instance_name" {
-  description ="The list of VMs instances names necessary for the project"
+variable "master_node_name" {
+  description ="The list of master instances names necessary for the project"
   type = list(string)
   default = [
     "master-node",
+  ]
+}
+
+variable "worker_node_name" {
+  description ="The list of worker instances names necessary for the project"
+  type = list(string)
+  default = [
     "worker-node-1",
-    "worker-node-2"
   ]
 }
 

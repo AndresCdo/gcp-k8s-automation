@@ -1,5 +1,11 @@
 .git
 .terraform*
+*inventory.ini*
 terraform.tfstate*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
 *.json
 plan
+*.svg

@@ -1,8 +1,196 @@
 ---
-- name: Transfer and execute a script.
+- name: Install dependencies for Docker & Kubernetes in all nodes
+  hosts: all
+  # strategy: free
+  become: true
+
+  pre_tasks:
+    - name: Check ALL hosts are reacheable before doing the release
+      debug:
+        msg: 
+          - 1 or more host is UNREACHABLE
+      # success_msg: ALL hosts are REACHABLE, go on
+      until: ansible_play_hosts == groups.all
+      retries: 10
+      delay: 10
+
+  roles:
+  - docker
+  - kubernetes
+
+- name: Initialize Master Node in Kubernetes Cluster
+  hosts: master
+  become: true
+  vars:
+    directory: "/home/{{ ansible_user }}/.kube"
+  tasks:
+
+  - name: Ensure permissions in Ansible user home directory
+    file:
+      path: "/home/{{ ansible_user }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0744'
+      state: directory
+
+  - name: Copy kubelet config file
+    ansible.builtin.copy:
+      src: "{{ playbook_dir }}/conf/kubernetes/kubeadm-config.yml"
+      dest: "/home/{{ ansible_user }}"
+      mode: '0644'
+
+  - name: Start service kubelet, if not started
+    ansible.builtin.service:
+      name: kubelet
+      state: started
+
+  - name: Migrate Kubeadm config file
+    ansible.builtin.shell: kubeadm config migrate --old-config "/home/{{ ansible_user }}/kubeadm-config.yml" --new-config "/home/{{ ansible_user }}/kubeadm-new-config.yml"
+    register: migrate
+
+  - name: Print migrate process output
+    debug:
+      msg: "{{ migrate.stdout_lines }}"
+
+  - name: Run kubeadm init with Kubernetes version 1.13
+    # ansible.builtin.shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 | tail -n 3 | sed '/^[[:space:]]*$/d' | cat -
+    # ansible.builtin.shell: kubeadm init --cgroup-driver=systemd --pod-network-cidr=192.168.0.0/16 --kubernetes-version=stable-1.13 
+    ansible.builtin.shell: timeout 5m kubeadm init --config "/home/{{ ansible_user }}/kubeadm-config.yml"   
+    register: hash_to_join
+  
+  - name: Pause until you can verify updates to an application were successful
+    ansible.builtin.pause:
+      seconds: 15
+
+  - name: Kubeadm Token to join workers
+    ansible.builtin.debug:
+      msg: "{{ hash_to_join.stdout_lines }}"
+
+  - name: Extract kubeadm token from stdout
+    ansible.builtin.shell: echo "{{ hash_to_join.stdout_lines[-1] }}"
+    register: result
+
+  - name: Print the kubeadm token
+    ansible.builtin.debug:
+      var: result.stdout
+
+  - name: Creates ~/.kube directory
+    file:
+      path: "{{ directory }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0744'
+      state: directory
+
+  - name: Check if the directory exists
+    ansible.builtin.stat:
+      path: "{{ directory }}"
+    register: dir_to_check
+
+  - name: Directory found
+    ansible.builtin.debug:
+      msg: "Directory {{ directory }} present"
+    when: dir_to_check.stat.isdir is defined and dir_to_check.stat.isdir
+
+  - name: Directory not found
+    ansible.builtin.debug:
+      msg: "Directory {{ directory }} not present"
+    when: dir_to_check.stat.isdir is not defined or not dir_to_check.stat.isdir
+
+  - name: Copy file with owner and permissions
+    ansible.builtin.copy:
+      src: /etc/kubernetes/admin.conf
+      dest: "{{ directory }}/config"
+      remote_src: yes
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0644'
+
+  - name: Check if the directory exists
+    ansible.builtin.stat:
+      path: "{{ directory }}/config"
+    register: file_to_check
+
+  - name: File found
+    ansible.builtin.debug:
+      msg: "File {{ directory }}/config present"
+    when: file_to_check.stat.exists
+
+  - name: File not found
+    ansible.builtin.debug:
+      msg: "File {{ directory }}/config not present"
+    when: not dir_to_check.stat.exists
+
+  - name: Pause until you can verify updates to an application were successful
+    ansible.builtin.pause:
+      seconds: 10
+
+  - name: Install the operator on cluster
+    become: false
+    # ansible.builtin.shell: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+    ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+
+  - name: Install Weave Add-on
+    become: false
+    ansible.builtin.shell: kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml 
+
+  - name: Pause for 30 secons to create coredns pods
+    ansible.builtin.pause:
+      seconds: 30
+
+  - name: Call kubectl to get kube-system pods
+    become: false
+    ansible.builtin.shell: kubectl get pods --namespace=kube-system
+    register: kube_system_pods
+
+  - name: kube-system pods
+    ansible.builtin.debug: 
+      msg: "{{ kube_system_pods.stdout_lines }}"
+
+- name: Initialize Worker Nodes in Kubernetes Cluster
+  hosts: workers
+  become: true
+  tasks:
+    - name: Join to Kubernetes Cluster using kubeadm token
+      ansible.builtin.shell: "{{ hostvars[item]['result']['stdout'] }}"
+      #ansible.builtin.shell: "kubeadm join 10.0.0.9:6443 --token bmdkhn.q2j4t94dcj9dbd5p --discovery-token-ca-cert-hash sha256:ddcc4e6898acdf8b85522effd57413272b957c092b8a3da08c62aba50b80a147"
+      with_items: "{{ groups['master'] }}"
+
+- name: Reset Weave network data
   hosts: all
   strategy: free
   become: true
-  tasks:    
-  - name: Install dependencies for Docker & Kubernetes
-    ansible.builtin.script:  provide-node.sh
+
+  pre_tasks:
+    - name: Check ALL hosts are reacheable before doing the release
+      debug:
+        msg:
+          - 1 or more host is UNREACHABLE
+      # success_msg: ALL hosts are REACHABLE, go on
+      until: ansible_play_hosts == groups.all
+      retries: 10
+      delay: 10
+
+  tasks:
+    - name: Remove database
+      ansible.builtin.file:
+        path: /var/lib/weave/weave-netdata.db
+        state: absent
+    
+    - name: Reboot host and wait for it to restart
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: whoami
+    
+    - name: Give group permissions to Docker Socket
+      become: true
+      ansible.builtin.file:
+        path: /var/run/docker.sock
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+

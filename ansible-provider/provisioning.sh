@@ -1,4 +1,5 @@
 #!/bin/bash
 
-./pre-setup-cluster.sh
-./init-cluster.sh
+time bash pre-setup-cluster.sh
+sleep 5
+time bash init-cluster.sh
