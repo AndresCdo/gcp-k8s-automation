@@ -18,7 +18,7 @@ provider "google" {
 
 # Create VPC
 resource "google_compute_network" "vcp_cluster" {
-  name   = "vcp_cluster"
+  name   = "vcp-cluster"
 }
 
 # Create Subnet
