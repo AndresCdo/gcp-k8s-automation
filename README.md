@@ -9,7 +9,7 @@ The project is organized into two main components: Terraform for infrastructure 
 ### Diagram
 
 The following diagram illustrates the infrastructure components created by Terraform in your GCP project:
-![GCP Infrastructure Diagram](./diagram/gcp_infrastructure_-_your_project_id.png)
+![GCP Infrastructure Diagram](./diagrams/gcp_infrastructure_-_your_project_id.png)
 
 The diagram shows the VPC network, subnets, and compute instances provisioned by Terraform. The Ansible playbooks will configure Docker and Kubernetes on the instances.
 
